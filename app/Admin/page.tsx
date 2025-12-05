@@ -11,6 +11,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { Delete, Edit, Trash } from "lucide-react";
+import Link from "next/link";
 
 interface Games {
   id: number;
@@ -111,6 +112,21 @@ export default function Home() {
       setImages([]);
       if (error) console.log(error);
       if (data) console.log(data);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  async function RemoveGames(id: number) {
+    try {
+      const { data, error } = await supabase
+        .from("Games")
+        .delete()
+        .eq("id", id)
+        .select("*");
+
+      if (error) console.log(error);
+      else console.log("Deleted:", data);
     } catch (err) {
       console.log(err);
     }
@@ -504,9 +520,11 @@ export default function Home() {
                               {game.Genres?.join(", ")}
                             </div>
                           </div>
-                          <div className="text-center text-lg mt-5 border border-neutral-600 bg-neutral-600 p-2 rounded-lg hover:scale-110 active:scale-100 transition-all">
-                            View Games
-                          </div>
+                          <Link href={`/Game/${game.Name}`}>
+                            <div className="text-center text-lg mt-5 border border-neutral-600 bg-neutral-600 p-2 rounded-lg hover:scale-110 active:scale-100 transition-all">
+                              View Games
+                            </div>
+                          </Link>
                           {edit === game.id ? (
                             <div>
                               {getDisc === game.id ? (
@@ -598,6 +616,7 @@ export default function Home() {
                                   <Trash
                                     size={23}
                                     className="hover:scale-105 active:scale-95 hover:text-red-500 transition-all"
+                                    onClick={() => RemoveGames(game.id)}
                                   />
                                 </div>
                                 <div>
@@ -908,13 +927,13 @@ export default function Home() {
                     className="border border-neutral-700 p-2 rounded-xl h-max"
                   >
                     <div>
-                      <div>
+                      <div className="flex items-center justify-center">
                         {Array.isArray(game?.Image_Url) &&
                           game.Image_Url.length > 0 && (
                             <Carousel
                               opts={{ align: "center" }}
                               orientation="horizontal"
-                              className="w-full max-w-xs"
+                              className="w-full max-w-xs relative"
                             >
                               <CarouselContent>
                                 {game.Image_Url.map((img, index) => (
@@ -931,8 +950,8 @@ export default function Home() {
                                   </CarouselItem>
                                 ))}
                               </CarouselContent>
-                              <CarouselPrevious className="bg-neutral-800 border border-neutral-800 hover:bg-neutral-800 hover:text-white" />
-                              <CarouselNext className="bg-neutral-800 border border-neutral-800 hover:bg-neutral-800 hover:text-white" />
+                              <CarouselPrevious className="absolute -left-4 bg-neutral-800 border border-neutral-800 hover:bg-neutral-800 hover:text-white" />
+                              <CarouselNext className="absolute -right-4 bg-neutral-800 border border-neutral-800 hover:bg-neutral-800 hover:text-white" />
                             </Carousel>
                           )}
                       </div>
@@ -967,9 +986,11 @@ export default function Home() {
                               {game.Genres?.join(", ")}
                             </div>
                           </div>
-                          <div className="text-center text-lg mt-5 border border-neutral-600 bg-neutral-600 p-2 rounded-lg hover:scale-110 active:scale-100 transition-all">
-                            View Games
-                          </div>
+                          <Link href={`/Game/${game.Name}`}>
+                            <div className="text-center text-lg mt-5 border border-neutral-600 bg-neutral-600 p-2 rounded-lg hover:scale-110 active:scale-100 transition-all">
+                              View Games
+                            </div>
+                          </Link>
                           {edit === game.id ? (
                             <div>
                               {getDisc === game.id ? (
@@ -1061,6 +1082,7 @@ export default function Home() {
                                   <Trash
                                     size={23}
                                     className="hover:scale-105 active:scale-95 hover:text-red-500 transition-all"
+                                    onClick={() => RemoveGames(game.id)}
                                   />
                                 </div>
                                 <div>

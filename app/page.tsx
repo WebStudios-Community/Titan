@@ -2,7 +2,6 @@
 
 import {
   ChevronDown,
-  ChevronLeft,
   ChevronRight,
   ChevronUp,
   Menu,
@@ -12,7 +11,7 @@ import {
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { supabase } from "./supabaseClient";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Carousel,
   CarouselContent,
@@ -22,6 +21,7 @@ import {
 } from "@/components/ui/carousel";
 import { Skeleton } from "@/components/ui/skeleton";
 import { User } from "@supabase/supabase-js";
+import Link from "next/link";
 
 interface Games {
   id: number;
@@ -36,10 +36,13 @@ interface Games {
 }
 
 export default function Home() {
+  const LinkMotiob = motion(Link);
   const [show, setShow] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [games, setGames] = useState<Games[] | null>(null);
   const [menu, setMenu] = useState(false);
+  const [yes, setYes] = useState(true);
+  const [genres, setGenres] = useState<string[]>([]);
 
   useEffect(() => {
     const getGames = async () => {
@@ -76,6 +79,12 @@ export default function Home() {
   }
 
   async function RemoveDisc(game: any) {
+    if (!games) return;
+    setGames((prev) =>
+      prev!.map((g) =>
+        g.id === game.id ? { ...g, discount: 0, discountedPrice: 0 } : g
+      )
+    );
     const { data, error } = await supabase
       .from("Games")
       .update({
@@ -106,7 +115,8 @@ export default function Home() {
           <div>
             {menu && (
               <div className="flex flex-col gap-4 fixed z-50 top-0 left-0 w-full h-full bg-neutral-900 p-4 overflow-auto">
-                <motion.div
+                <LinkMotiob
+                  href="/Games"
                   className="mt-15 relative flex items-center justify-center h-14 bg-neutral-800 rounded-xl shadow-md cursor-pointer overflow-hidden"
                   whileTap={{ scale: 0.97 }}
                 >
@@ -119,7 +129,7 @@ export default function Home() {
                   <div className="relative z-10 text-lg font-semibold text-white">
                     All Games
                   </div>
-                </motion.div>
+                </LinkMotiob>
                 <div className="relative">
                   <div
                     className="flex items-center justify-between h-14 bg-neutral-800 rounded-xl shadow-md px-4 cursor-pointer"
@@ -184,37 +194,75 @@ export default function Home() {
                             "Platformer",
                             "Multiplayer",
                           ].map((g) => (
-                            <div
-                              key={g}
-                              className="px-3 py-1 rounded-lg bg-neutral-700 hover:bg-red-500 hover:text-white text-sm text-neutral-200 transition-all duration-200 cursor-pointer"
-                            >
-                              {g}
-                            </div>
+                            <Link key={g} href={`/Games?Genres=${g}`}>
+                              <div className="px-3 py-1 rounded-lg bg-neutral-700 hover:bg-red-500 hover:text-white text-sm text-neutral-200 transition-all duration-200 cursor-pointer">
+                                {g}
+                              </div>
+                            </Link>
                           ))}
                         </div>
                       </div>
                     </div>
                   )}
                 </div>
-                {["Discount", "Free Gift", "Steam Games", "Game Pass"].map(
-                  (item) => (
-                    <motion.div
-                      key={item}
-                      className="relative flex items-center justify-center h-14 bg-neutral-800 rounded-xl shadow-md cursor-pointer overflow-hidden"
-                      whileTap={{ scale: 0.97 }}
-                    >
-                      <motion.div
-                        className="absolute left-0 top-0 h-full bg-red-500"
-                        initial={{ width: "100%" }}
-                        whileTap={{ width: 0 }}
-                        transition={{ duration: 0.3, ease: "easeInOut" }}
-                      />
-                      <div className="relative z-10 text-lg font-semibold text-white">
-                        {item}
-                      </div>
-                    </motion.div>
-                  )
-                )}
+                <LinkMotiob
+                  href={`/Games?discount=${yes}`}
+                  className="relative flex items-center justify-center h-14 bg-neutral-800 rounded-xl shadow-md cursor-pointer overflow-hidden"
+                  whileTap={{ scale: 0.97 }}
+                >
+                  <motion.div
+                    className="absolute left-0 top-0 h-full bg-red-500"
+                    initial={{ width: "100%" }}
+                    whileTap={{ width: 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                  />
+                  <div className="relative z-10 text-lg font-semibold text-white">
+                    Discount
+                  </div>
+                </LinkMotiob>
+                <motion.div
+                  className="relative flex items-center justify-center h-14 bg-neutral-800 rounded-xl shadow-md cursor-pointer overflow-hidden"
+                  whileTap={{ scale: 0.97 }}
+                >
+                  <motion.div
+                    className="absolute left-0 top-0 h-full bg-red-500"
+                    initial={{ width: "100%" }}
+                    whileTap={{ width: 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                  />
+                  <div className="relative z-10 text-lg font-semibold text-white">
+                    Free Gifts
+                  </div>
+                </motion.div>
+                <LinkMotiob
+                  href={`/Games?Platform=${"steam"}`}
+                  className="relative flex items-center justify-center h-14 bg-neutral-800 rounded-xl shadow-md cursor-pointer overflow-hidden"
+                  whileTap={{ scale: 0.97 }}
+                >
+                  <motion.div
+                    className="absolute left-0 top-0 h-full bg-red-500"
+                    initial={{ width: "100%" }}
+                    whileTap={{ width: 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                  />
+                  <div className="relative z-10 text-lg font-semibold text-white">
+                    Steam Games
+                  </div>
+                </LinkMotiob>
+                <motion.div
+                  className="relative flex items-center justify-center h-14 bg-neutral-800 rounded-xl shadow-md cursor-pointer overflow-hidden"
+                  whileTap={{ scale: 0.97 }}
+                >
+                  <motion.div
+                    className="absolute left-0 top-0 h-full bg-red-500"
+                    initial={{ width: "100%" }}
+                    whileTap={{ width: 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                  />
+                  <div className="relative z-10 text-lg font-semibold text-white">
+                    Game Pass
+                  </div>
+                </motion.div>
               </div>
             )}
           </div>
@@ -247,7 +295,7 @@ export default function Home() {
                     ?.map((game, index) => (
                       <CarouselItem
                         key={index}
-                        className="shrink-0 bg-neutral-800 rounded-2xl p-3 shadow-md"
+                        className="shrink-0 bg-neutral-800 rounded-2xl p-3 shadow-md h-max"
                       >
                         <div className="flex flex-col">
                           {game.Image_Url && (
@@ -287,7 +335,7 @@ export default function Home() {
                                 className="flex items-center justify-end mt-2 gap-2 cursor-pointer text-sm text-neutral-300 hover:text-red-500"
                                 onClick={() => RemoveDisc(game)}
                               >
-                                <div>Ukloni</div>
+                                Ukloni
                                 <X size={18} />
                               </div>
                             )}
@@ -302,11 +350,12 @@ export default function Home() {
       </div>
       <div className="md:flex hidden flex-col">
         <div className="border-b-3 border-b-neutral-600 w-full h-15 flex items-center">
-          <motion.div
+          <LinkMotiob
             className="relative overflow-hidden border-r-3 border-r-neutral-600 h-15 flex-1 flex items-center justify-center"
             whileHover="rest"
             initial="hover"
             animate="hover"
+            href="/Games"
           >
             <motion.div
               variants={{
@@ -319,7 +368,7 @@ export default function Home() {
             <div className="relative z-10 text-lg flex items-center gap-4">
               All Games
             </div>
-          </motion.div>
+          </LinkMotiob>
           <div
             className="relative flex-1 flex items-center"
             onMouseEnter={() => setShow(true)}
@@ -344,21 +393,24 @@ export default function Home() {
                       Platform
                     </div>
                     {[
-                      "Steam",
-                      "Epic",
-                      "Rockstar",
-                      "Microsoft",
-                      "EA Play",
-                      "Playstation",
-                      "Xbox",
+                      "steam",
+                      "epic",
+                      "rockstar",
+                      "microsoft",
+                      "eaplay",
+                      "playstation",
+                      "xbox",
                     ].map((p) => (
-                      <div key={p} className="hover:text-white cursor-pointer">
-                        {p}
-                      </div>
+                      <Link key={p} href={`/Games?Platform=${p}`}>
+                        <div className="hover:text-white cursor-pointer">
+                          {p}
+                        </div>
+                      </Link>
                     ))}
                   </div>
                   <div className="flex flex-col gap-2">
                     <div className="font-semibold text-neutral-200">Genres</div>
+
                     <div className="grid grid-cols-2 gap-x-10 gap-y-2">
                       {[
                         [
@@ -382,12 +434,14 @@ export default function Home() {
                       ].map((col, ci) => (
                         <div key={ci} className="flex flex-col gap-2">
                           {col.map((g) => (
-                            <div
-                              key={g}
-                              className="hover:text-white cursor-pointer"
-                            >
-                              {g}
-                            </div>
+                            <Link key={g} href={`/Games?Genres=${g}`}>
+                              <div
+                                className="hover:text-white cursor-pointer"
+                                onClick={() => setGenres([g])}
+                              >
+                                {g}
+                              </div>
+                            </Link>
                           ))}
                         </div>
                       ))}
@@ -397,11 +451,12 @@ export default function Home() {
               </div>
             )}
           </div>
-          <motion.div
+          <LinkMotiob
             className="relative overflow-hidden border-r-3 border-r-neutral-600 h-15 flex-1 flex items-center justify-center"
             whileHover="rest"
             initial="hover"
             animate="hover"
+            href={`/Games?discount=${yes}`}
           >
             <motion.div
               variants={{
@@ -414,7 +469,7 @@ export default function Home() {
             <div className="relative z-10 text-lg flex items-center gap-4">
               Discount
             </div>
-          </motion.div>
+          </LinkMotiob>
           <motion.div
             className="relative overflow-hidden border-r-3 border-r-neutral-600 h-15 flex-1 flex items-center justify-center"
             whileHover="rest"
@@ -433,11 +488,12 @@ export default function Home() {
               Free Gift
             </div>
           </motion.div>
-          <motion.div
+          <LinkMotiob
             className="relative overflow-hidden border-r-3 border-r-neutral-600 h-15 flex-1 flex items-center justify-center"
             whileHover="rest"
             initial="hover"
             animate="hover"
+            href={`/Games?Platform=${"steam"}`}
           >
             <motion.div
               variants={{
@@ -450,7 +506,7 @@ export default function Home() {
             <div className="relative z-10 text-lg flex items-center gap-4">
               Steam Games
             </div>
-          </motion.div>
+          </LinkMotiob>
           <motion.div
             className="relative overflow-hidden border-r-3 border-r-neutral-600 h-15 flex-1 flex items-center justify-center"
             whileHover="rest"
@@ -515,13 +571,13 @@ export default function Home() {
                           <div className="text-md mt-2">{game.Name}</div>
                           <div className="flex justify-between items-center">
                             <div>
-                              <div className="text-green-400 text-md font-semibold">
+                              <div className="text-red-400 text-md font-semibold">
                                 -{game.discount}%
                               </div>
                             </div>
                             <div>
                               <div className="text-green-400 text-md font-semibold flex items-end gap-2">
-                                <span className="text-xs line-through">
+                                <span className="text-neutral-400 text-xs line-through">
                                   {game.Price}
                                 </span>
                                 {game.discountedPrice}rsd
@@ -541,7 +597,7 @@ export default function Home() {
                                   className="flex gap-2 items-center"
                                   onClick={() => RemoveDisc(game)}
                                 >
-                                  <div>Ukloni</div>
+                                  Ukloni
                                   <X size={20} />
                                 </div>
                               )}

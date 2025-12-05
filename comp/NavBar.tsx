@@ -49,7 +49,7 @@ export default function NavBar() {
         >
           <div className="text-neutral-400">Contact</div>
           <div className="text-neutral-400">Support</div>
-          {user?.email === "akidimke136@gmail.com" &&
+          {user?.email === "akidimke136@gmail.com" ||
           "dimicmateja685@gmail.com" ? (
             <div>
               <Link href="/Admin">
@@ -230,7 +230,7 @@ export default function NavBar() {
         >
           Support
         </motion.div>
-        {user?.email === "akidimke136@gmail.com" &&
+        {user?.email === "akidimke136@gmail.com" ||
         "dimicmateja685@gmail.com" ? (
           <div>
             <Link href="/Admin">
