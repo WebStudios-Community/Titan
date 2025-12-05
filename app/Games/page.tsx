@@ -30,7 +30,7 @@ interface Games {
   Image_Url: string[];
 }
 
-export default function Home() {
+export default function GamesPage() {
   const searchParams = useSearchParams();
   const [games, setGames] = useState<Games[] | null>(null);
   const [minprice, setMinPrice] = useState("");
