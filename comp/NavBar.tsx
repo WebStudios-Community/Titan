@@ -18,6 +18,7 @@ import { supabase } from "@/app/supabaseClient";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
+import { useGuestID } from "@/app/GuestProvider";
 
 interface Cart {
   id: number;
@@ -34,6 +35,7 @@ export default function NavBar() {
   const [showI, setShowI] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [carts, setCarts] = useState<Cart[] | null>(null);
+  const guestID = useGuestID();
   const router = useRouter();
   const path = usePathname();
 
@@ -50,10 +52,13 @@ export default function NavBar() {
   });
   useEffect(() => {
     const getGames = async () => {
+      const cartUserID = user?.id || guestID;
+      if (!cartUserID) return;
+
       const { data } = await supabase
         .from("Cart")
         .select("*")
-        .eq("user_id", user?.id);
+        .eq("user_id", cartUserID);
 
       setCarts(data);
     };
