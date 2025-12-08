@@ -183,21 +183,23 @@ export default function NavBar() {
                     </Link>
                   </div>
                 )}
-                <div className="relative transition-all">
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 1.5, delay: 0.7 }}
-                    className="cursor-pointer border border-neutral-600  transition-all w-10 h-10 rounded-xl flex items-center justify-center"
-                  >
-                    <ShoppingBag size={20} />
-                    <div>
-                      <div className="absolute bottom-6 left-6 bg-purple-400 w-5 h-5 text-sm rounded-full text-center flex items-center justify-center">
-                        {(carts && carts.length) || 0}
+                <Link href="Cart">
+                  <div className="relative transition-all">
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 1.5, delay: 0.7 }}
+                      className="cursor-pointer border border-neutral-600  transition-all w-10 h-10 rounded-xl flex items-center justify-center"
+                    >
+                      <ShoppingBag size={20} />
+                      <div>
+                        <div className="absolute bottom-6 left-6 bg-purple-400 w-5 h-5 text-sm rounded-full text-center flex items-center justify-center">
+                          {(carts && carts.length) || 0}
+                        </div>
                       </div>
-                    </div>
-                  </motion.div>
-                </div>
+                    </motion.div>
+                  </div>
+                </Link>
               </div>
             </div>
           </div>
@@ -334,21 +336,23 @@ export default function NavBar() {
               </Link>
             </div>
           )}
-          <div className="relative transition-all">
-            <motion.div
-              initial={{ x: -20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ duration: 1.5, delay: 1.1 }}
-              className="cursor-pointer border border-neutral-600 hover:shadow-lg hover:shadow-neutral-600 w-10 h-10 rounded-xl flex items-center justify-center"
-            >
-              <ShoppingBag size={20} />
-              <div>
-                <div className="absolute bottom-6 left-6 bg-purple-400 w-5 h-5 text-sm rounded-full text-center flex items-center justify-center">
-                  {(carts && carts.length) || 0}
+          <Link href="/Cart">
+            <div className="relative transition-all">
+              <motion.div
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ duration: 1.5, delay: 1.1 }}
+                className="cursor-pointer border border-neutral-600 hover:shadow-lg hover:shadow-neutral-600 w-10 h-10 rounded-xl flex items-center justify-center"
+              >
+                <ShoppingBag size={20} />
+                <div>
+                  <div className="absolute bottom-6 left-6 bg-purple-400 w-5 h-5 text-sm rounded-full text-center flex items-center justify-center">
+                    {(carts && carts.length) || 0}
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          </div>
+              </motion.div>
+            </div>
+          </Link>
         </div>
       </div>
     </div>

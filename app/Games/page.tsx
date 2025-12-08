@@ -883,26 +883,29 @@ export default function GamesPage() {
           <div>
             {games === null ? (
               <div>
-                <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-6 mt-25">
-                  {[...Array(5)].map((_: any, i: any) => (
-                    <div key={i}>
-                      <Skeleton className="w-[200px] h-[380px]" />
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mt-25">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="flex justify-center">
+                      <Skeleton className="w-[220px] h-110 rounded-2xl" />
                     </div>
                   ))}
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-6 mt-25 mr-5 ">
+              <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-6 mt-25 mr-5">
                 {filteredGames?.map((game) => (
                   <div key={game.id}>
                     <div>
-                      <div className="border-3 border-neutral-700 p-5 rounded-2xl h-110 relative">
-                        <div className="relative">
+                      <div className="w-full max-w-[420px] border-3 border-neutral-700 p-5 rounded-2xl h-110 relative">
+                        <div className="relative flex items-center justify-center">
                           {hovered === game.id ? (
                             <div>
                               <AnimatePresence>
                                 {game.Image_Url && (
-                                  <div onMouseLeave={() => setHovered(null)}>
+                                  <div
+                                    className="relative inline-block"
+                                    onMouseLeave={() => setHovered(null)}
+                                  >
                                     <Image
                                       src={ImgurConv(game.Image_Url[0])}
                                       alt=""
@@ -916,25 +919,28 @@ export default function GamesPage() {
                                         {game.discount}%
                                       </div>
                                     )}
+
                                     <Link href={`/Game/${game.id}`}>
-                                      <motion.div
-                                        initial={{ y: -10, opacity: 0 }}
-                                        animate={{ y: 0, opacity: 1 }}
-                                        exit={{ y: -10, opacity: 0 }}
-                                        whileHover={{ scale: 1.1 }}
-                                        whileTap={{ scale: 1 }}
-                                        transition={{ duration: 1 }}
-                                        className="absolute left-15 top-7 border border-neutral-600 p-2 rounded-xl bg-neutral-600"
-                                      >
-                                        View
-                                      </motion.div>
+                                      <div className="absolute inset-0 flex items-center justify-center">
+                                        <motion.div
+                                          initial={{ y: -10, opacity: 0 }}
+                                          animate={{ y: 0, opacity: 1 }}
+                                          exit={{ y: -10, opacity: 0 }}
+                                          whileHover={{ scale: 1.1 }}
+                                          whileTap={{ scale: 1 }}
+                                          transition={{ duration: 1 }}
+                                          className="border border-neutral-600 p-2 rounded-xl bg-neutral-600"
+                                        >
+                                          View
+                                        </motion.div>
+                                      </div>
                                     </Link>
                                   </div>
                                 )}
                               </AnimatePresence>
                             </div>
                           ) : (
-                            <div>
+                            <div className="relative inline-block">
                               {game.Image_Url && (
                                 <div
                                   onMouseEnter={() => setHovered(game.id)}
@@ -947,8 +953,9 @@ export default function GamesPage() {
                                     height={200}
                                     className="rounded-2xl transition-all duration-500"
                                   />
+
                                   {game.discount && (
-                                    <div className="absolute -top-2 -right-2 text-xs border border-purple-500 bg-purple-500 rounded-full w-8 h-8 flex items-center justify-center">
+                                    <div className="absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 text-xs border border-purple-500 bg-purple-500 rounded-full w-8 h-8 flex items-center justify-center">
                                       {game.discount}%
                                     </div>
                                   )}
