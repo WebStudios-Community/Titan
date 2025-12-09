@@ -54,7 +54,6 @@ export default function NavBar() {
   useEffect(() => {
     const getGames = async () => {
       const cartUserID = user?.id || guestID;
-
       const { data, error } = await supabase
         .from("Cart")
         .select("*")
@@ -207,7 +206,7 @@ export default function NavBar() {
                       <ShoppingBag size={20} />
                       <div>
                         <div className="absolute bottom-6 left-6 bg-purple-400 w-5 h-5 text-sm rounded-full text-center flex items-center justify-center">
-                          {(carts && carts.length) || 0}
+                          {carts?.length ?? 0}
                         </div>
                       </div>
                     </motion.div>
@@ -358,7 +357,7 @@ export default function NavBar() {
                 <ShoppingBag size={20} />
                 <div>
                   <div className="absolute bottom-6 left-6 bg-purple-400 w-5 h-5 text-sm rounded-full text-center flex items-center justify-center">
-                    {(carts && carts.length) || 0}
+                    {carts?.length ?? 0}
                   </div>
                 </div>
               </motion.div>
