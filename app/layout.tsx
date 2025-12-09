@@ -26,7 +26,13 @@ export default function RootLayout({
       <body
         className={`${poppins.className} select-none antialiased text-neutral-300 bg-linear-to-l from-neutral-800 to-neutral-950 min-h-screen`}
       >
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense
+          fallback={
+            <div className="text-2xl flex items-center justify-center h-screen">
+              Loading...
+            </div>
+          }
+        >
           <NavBar />
           <GuestProvider>{children}</GuestProvider>
           <Footer />

@@ -20,24 +20,23 @@ export default function Home() {
   const [carts, setCarts] = useState<Cart[] | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [change1, setChange1] = useState(false);
+  const [refresh, setRefresh] = useState(false);
   const [change, setChange] = useState<number | null>(null);
   const guestID = useGuestID();
 
   useEffect(() => {
     const getGames = async () => {
       const cartUserID = user?.id || guestID;
-      if (!cartUserID) return;
 
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("Cart")
         .select("*")
         .eq("user_id", cartUserID);
-
-      setCarts(data);
+      if (!error) setCarts(data);
     };
 
     getGames();
-  });
+  }, [refresh, user]);
 
   useEffect(() => {
     const Getuser = async () => {
@@ -72,8 +71,9 @@ export default function Home() {
       .eq("id", id)
       .single();
 
-    if (error) console.log(error);
+    if (!error) setRefresh((prev) => !prev);
   }
+
   return (
     <div>
       <div className="md:hidden">
@@ -108,7 +108,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-        <div className="flex items-center justify-center mr-10">
+        <div className="flex items-center justify-center">
           <div className="border border-neutral-600 p-2 rounded-xl w-80 h-100 overflow-y-scroll flex flex-col gap-2">
             {carts?.map((cart) => (
               <div key={cart.id}>

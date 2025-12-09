@@ -19,7 +19,6 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Skeleton } from "@/components/ui/skeleton";
 import { User } from "@supabase/supabase-js";
 import Link from "next/link";
 
@@ -43,16 +42,17 @@ export default function Home() {
   const [menu, setMenu] = useState(false);
   const [yes, setYes] = useState(true);
   const [genres, setGenres] = useState<string[]>([]);
+  const [refresh, setRefresh] = useState(false);
 
   useEffect(() => {
     const getGames = async () => {
-      const { data } = await supabase.from("Games").select("*");
+      const { data, error } = await supabase.from("Games").select("*");
 
-      setGames(data);
+      if (!error) setGames(data);
     };
 
     getGames();
-  });
+  }, [refresh, user]);
   useEffect(() => {
     const Getuser = async () => {
       const {
@@ -79,12 +79,6 @@ export default function Home() {
   }
 
   async function RemoveDisc(game: any) {
-    if (!games) return;
-    setGames((prev) =>
-      prev!.map((g) =>
-        g.id === game.id ? { ...g, discount: 0, discountedPrice: 0 } : g
-      )
-    );
     const { data, error } = await supabase
       .from("Games")
       .update({
@@ -93,7 +87,9 @@ export default function Home() {
       })
       .eq("id", game.id);
 
-    if (error) console.log(error);
+    if (!error) {
+      setRefresh((prev) => !prev);
+    }
     if (data) console.log(data);
   }
 
@@ -275,76 +271,70 @@ export default function Home() {
               </div>
               <div>Best Price for you!</div>
             </div>
-            {games === null ? (
-              <div className="flex flex-col gap-4 items-center">
-                <Skeleton className="w-[95%] h-64 rounded-xl bg-neutral-700" />
-              </div>
-            ) : (
-              <Carousel
-                opts={{
-                  align: "start",
-                  loop: false,
-                  skipSnaps: false,
-                }}
-                className="w-full overflow-x-auto"
-              >
-                <CarouselContent className="flex gap-4 ml-5 mr-5">
-                  {games
-                    ?.filter((g) => g.discount)
-                    .sort((a, b) => b.discount - a.discount)
-                    ?.map((game, index) => (
-                      <CarouselItem
-                        key={index}
-                        className="shrink-0 bg-neutral-800 rounded-2xl p-3 shadow-md h-max"
-                      >
-                        <div className="flex flex-col">
-                          {game.Image_Url && (
-                            <div className="flex items-center justify-center">
-                              <Image
-                                src={ImgurConv(game.Image_Url[0])}
-                                alt={game.Name}
-                                width={300}
-                                height={300}
-                                className="rounded-2xl object-cover"
-                              />
-                            </div>
-                          )}
-                          <div className="text-md mt-2 font-semibold text-white">
-                            {game.Name}
+            <Carousel
+              opts={{
+                align: "start",
+                loop: false,
+                skipSnaps: false,
+              }}
+              className="w-full overflow-x-auto"
+            >
+              <CarouselContent className="flex gap-4 ml-5 mr-5">
+                {games
+                  ?.filter((g) => g.discount)
+                  .sort((a, b) => b.discount - a.discount)
+                  ?.map((game, index) => (
+                    <CarouselItem
+                      key={index}
+                      className="shrink-0 bg-neutral-800 rounded-2xl p-3 shadow-md h-max"
+                    >
+                      <div className="flex flex-col">
+                        {game.Image_Url && (
+                          <div className="flex items-center justify-center">
+                            <Image
+                              src={ImgurConv(game.Image_Url[0])}
+                              alt={game.Name}
+                              width={300}
+                              height={300}
+                              className="rounded-2xl object-cover"
+                            />
                           </div>
-                          <div className="flex justify-between items-center mt-1">
-                            <div className="text-red-400 font-bold text-sm">
-                              -{game.discount}%
-                            </div>
-                            <div className="flex items-end gap-2 text-sm text-green-400 font-semibold">
-                              <span className="line-through text-xs text-neutral-400">
-                                {game.Price}rsd
-                              </span>
-                              {game.discountedPrice}rsd
-                            </div>
-                          </div>
-
-                          <div className="mt-3">
-                            <button className="w-full flex items-center justify-center gap-2 p-2 rounded-xl bg-neutral-600 text-white font-medium">
-                              Add Cart <ShoppingBag size={18} />
-                            </button>
-                          </div>
-                          {user?.email === "akidimke136@gmail.com" &&
-                            "dimicmateja685@gmail.com" && (
-                              <div
-                                className="flex items-center justify-end mt-2 gap-2 cursor-pointer text-sm text-neutral-300 hover:text-red-500"
-                                onClick={() => RemoveDisc(game)}
-                              >
-                                Ukloni
-                                <X size={18} />
-                              </div>
-                            )}
+                        )}
+                        <div className="text-md mt-2 font-semibold text-white">
+                          {game.Name}
                         </div>
-                      </CarouselItem>
-                    ))}
-                </CarouselContent>
-              </Carousel>
-            )}
+                        <div className="flex justify-between items-center mt-1">
+                          <div className="text-red-400 font-bold text-sm">
+                            -{game.discount}%
+                          </div>
+                          <div className="flex items-end gap-2 text-sm text-green-400 font-semibold">
+                            <span className="line-through text-xs text-neutral-400">
+                              {game.Price}rsd
+                            </span>
+                            {game.discountedPrice}rsd
+                          </div>
+                        </div>
+
+                        <div className="mt-3">
+                          <button className="w-full flex items-center justify-center gap-2 p-2 rounded-xl bg-neutral-600 text-white font-medium">
+                            Add Cart <ShoppingBag size={18} />
+                          </button>
+                        </div>
+                        {user?.email === "akidimke136@gmail.com" ||
+                          (user?.email === "dimicmateja685@gmail.com" && (
+                            <div
+                              className="flex items-center justify-end mt-2 gap-2 cursor-pointer text-sm text-neutral-300 hover:text-red-500"
+                              onClick={() => RemoveDisc(game)}
+                            >
+                              Ukloni
+                              <X size={18} />
+                            </div>
+                          ))}
+                      </div>
+                    </CarouselItem>
+                  ))}
+              </CarouselContent>
+            </Carousel>
           </div>
         </div>
       </div>
@@ -534,82 +524,72 @@ export default function Home() {
               </div>
               <div>Best Price for you!</div>
             </div>
-            {games === null ? (
-              <div className="flex items-center">
-                {[...Array(4)].map((_: any, i: any) => (
-                  <div key={i}>
-                    <Skeleton className="w-[270px] h-[250px] ml-10"></Skeleton>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <Carousel
-                opts={{
-                  align: "start",
-                }}
-                className="w-[70%] ml-25"
-              >
-                <CarouselContent className="flex items-center">
-                  {games
-                    ?.filter((g) => g.discount)
-                    .sort((a, b) => b.discount - a.discount)
-                    ?.map((game, index) => (
-                      <CarouselItem
-                        key={index}
-                        className="basis-1/4 border border-neutral-500 p-2 rounded-xl ml-10"
-                      >
-                        <div className="p-1">
-                          {game.Image_Url && (
-                            <Image
-                              src={ImgurConv(game.Image_Url[0])}
-                              alt={game.Name}
-                              width={550}
-                              height={550}
-                              className="rounded-2xl"
-                            />
-                          )}
-                          <div className="text-md mt-2">{game.Name}</div>
-                          <div className="flex justify-between items-center">
-                            <div>
-                              <div className="text-red-400 text-md font-semibold">
-                                -{game.discount}%
-                              </div>
-                            </div>
-                            <div>
-                              <div className="text-green-400 text-md font-semibold flex items-end gap-2">
-                                <span className="text-neutral-400 text-xs line-through">
-                                  {game.Price}
-                                </span>
-                                {game.discountedPrice}rsd
-                              </div>
+            <Carousel
+              opts={{
+                align: "start",
+              }}
+              className="w-[70%] ml-25"
+            >
+              <CarouselContent className="flex items-center">
+                {games
+                  ?.filter((g) => g.discount)
+                  .sort((a, b) => b.discount - a.discount)
+                  ?.map((game, index) => (
+                    <CarouselItem
+                      key={index}
+                      className="basis-1/4 border border-neutral-500 p-2 rounded-xl ml-10"
+                    >
+                      <div className="p-1">
+                        {game.Image_Url && (
+                          <Image
+                            src={ImgurConv(game.Image_Url[0])}
+                            alt={game.Name}
+                            width={550}
+                            height={550}
+                            className="rounded-2xl"
+                          />
+                        )}
+                        <div className="text-md mt-2">{game.Name}</div>
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <div className="text-red-400 text-md font-semibold">
+                              -{game.discount}%
                             </div>
                           </div>
-                          <div className="w-full mt-4 flex items-center justify-center">
-                            <div className="border border-neutral-700 w-full p-2 flex items-center justify-center gap-3 rounded-xl bg-neutral-700 hover:bg-neutral-800 transition-all">
-                              Add Cart
-                              <ShoppingBag size={20} />
+                          <div>
+                            <div className="text-green-400 text-md font-semibold flex items-end gap-2">
+                              <span className="text-neutral-400 text-xs line-through">
+                                {game.Price}
+                              </span>
+                              {game.discountedPrice}rsd
                             </div>
-                          </div>
-                          <div className="flex items-center justify-end mt-3">
-                            {user?.email === "akidimke136@gmail.com" &&
-                              "dimicmateja685@gmail.com" && (
-                                <div
-                                  className="flex gap-2 items-center"
-                                  onClick={() => RemoveDisc(game)}
-                                >
-                                  Ukloni
-                                  <X size={20} />
-                                </div>
-                              )}
                           </div>
                         </div>
-                      </CarouselItem>
-                    ))}
-                </CarouselContent>
-                <CarouselPrevious className="bg-neutral-600 border border-neutral-600 hover:bg-neutral-700 hover:text-white" />
-                <CarouselNext className="bg-neutral-600 border border-neutral-600 hover:bg-neutral-700 hover:text-white" />
-              </Carousel>
-            )}
+                        <div className="w-full mt-4 flex items-center justify-center">
+                          <div className="border border-neutral-700 w-full p-2 flex items-center justify-center gap-3 rounded-xl bg-neutral-700 hover:bg-neutral-800 transition-all">
+                            Add Cart
+                            <ShoppingBag size={20} />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-end mt-3">
+                          {user?.email === "akidimke136@gmail.com" ||
+                            (user?.email === "dimicmateja685@gmail.com" && (
+                              <div
+                                className="flex gap-2 items-center"
+                                onClick={() => RemoveDisc(game)}
+                              >
+                                Ukloni
+                                <X size={20} />
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    </CarouselItem>
+                  ))}
+              </CarouselContent>
+              <CarouselPrevious className="bg-neutral-600 border border-neutral-600 hover:bg-neutral-700 hover:text-white" />
+              <CarouselNext className="bg-neutral-600 border border-neutral-600 hover:bg-neutral-700 hover:text-white" />
+            </Carousel>
           </div>
         </div>
       </div>

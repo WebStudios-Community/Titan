@@ -35,6 +35,7 @@ export default function NavBar() {
   const [showI, setShowI] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [carts, setCarts] = useState<Cart[] | null>(null);
+  const [refresh, setRefresh] = useState(false);
   const guestID = useGuestID();
   const router = useRouter();
   const path = usePathname();
@@ -55,16 +56,16 @@ export default function NavBar() {
       const cartUserID = user?.id || guestID;
       if (!cartUserID) return;
 
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("Cart")
         .select("*")
         .eq("user_id", cartUserID);
 
-      setCarts(data);
+      if (!error) setCarts(data);
     };
 
     getGames();
-  });
+  }, [refresh, user]);
 
   if (path === "/Account") return <></>;
 

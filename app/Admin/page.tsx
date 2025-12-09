@@ -43,16 +43,18 @@ export default function Home() {
   const [discount, setDiscount] = useState(Number(1));
   const [discPrice, setDiscPrice] = useState(Number(1));
   const [search, setSearch] = useState("");
+  const [refresh, setRefresh] = useState(false);
 
   useEffect(() => {
     const getGames = async () => {
-      const { data } = await supabase.from("Games").select("*");
+      const { data, error } = await supabase.from("Games").select("*");
 
+      if (!error) setRefresh((prev) => !prev);
       setGames(data);
     };
 
     getGames();
-  });
+  }, [refresh]);
 
   const totalPrice = (price: number, discount: number) => {
     return Math.round(price - (price * discount) / 100);
@@ -110,7 +112,7 @@ export default function Home() {
       setGenres([]);
       setImage("");
       setImages([]);
-      if (error) console.log(error);
+      if (!error) setRefresh((prev) => !prev);
       if (data) console.log(data);
     } catch (err) {
       console.log(err);
@@ -125,7 +127,7 @@ export default function Home() {
         .eq("id", id)
         .select("*");
 
-      if (error) console.log(error);
+      if (!error) setRefresh((prev) => !prev);
       else console.log("Deleted:", data);
     } catch (err) {
       console.log(err);
@@ -141,7 +143,7 @@ export default function Home() {
       })
       .eq("id", game.id);
 
-    if (error) console.log(error);
+    if (!error) setRefresh((prev) => !prev);
     if (data) console.log(data);
     setDiscPrice(Number(game.Price));
     setDiscount(Number(1));
@@ -156,7 +158,7 @@ export default function Home() {
       })
       .eq("id", game.id);
 
-    if (error) console.log(error);
+    if (!error) setRefresh((prev) => !prev);
     if (data) console.log(data);
     setEdit(null);
   }

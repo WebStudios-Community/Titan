@@ -17,25 +17,28 @@ export default function Home() {
   const [name, setName] = useState("");
   const [change, setChange] = useState<string | null>(null);
   const [convert, setConvert] = useState(false);
+  const [refresh, setRefresh] = useState(false);
 
   useEffect(() => {
     const Getuser = async () => {
       const {
         data: { user },
+        error,
       } = await supabase.auth.getUser();
 
+      if (!error) setRefresh((prev) => !prev);
       setUser(user);
     };
 
     Getuser();
-  });
+  }, [refresh]);
 
   async function ChangeEmail() {
     const { data, error } = await supabase.auth.updateUser({
       email: newEmail,
     });
+    if (!error) setRefresh((prev) => !prev);
     if (data) console.log(data);
-    if (error) console.log(error);
     setNewEmail("");
     setChange(null);
   }
@@ -46,15 +49,15 @@ export default function Home() {
         full_name: name,
       },
     });
+    if (!error) setRefresh((prev) => !prev);
     if (data) console.log(data);
-    if (error) console.log(error);
     setName("");
     setChange(null);
   }
 
   async function Logout() {
     const { error } = await supabase.auth.signOut();
-    if (error) console.log(error);
+    if (!error) setRefresh((prev) => !prev);
   }
 
   return (
@@ -65,24 +68,20 @@ export default function Home() {
             <div className="text-2xl m-10">Profile</div>
             <div className="flex flex-col items-center gap-5">
               <motion.div>
-                {user === null ? (
-                  <Skeleton className="ml-10 w-[130px] h-[130px] rounded-4xl" />
-                ) : (
-                  <div>
-                    {user?.user_metadata?.avatar_url && (
-                      <div className="ml-10 flex items-end gap-2">
-                        <Image
-                          src={user?.user_metadata?.avatar_url}
-                          alt=""
-                          width={130}
-                          height={130}
-                          className="rounded-4xl"
-                        />
-                        <motion.div></motion.div>
-                      </div>
-                    )}
-                  </div>
-                )}
+                <div>
+                  {user?.user_metadata?.avatar_url && (
+                    <div className="ml-10 flex items-end gap-2">
+                      <Image
+                        src={user?.user_metadata?.avatar_url}
+                        alt=""
+                        width={130}
+                        height={130}
+                        className="rounded-4xl"
+                      />
+                      <motion.div></motion.div>
+                    </div>
+                  )}
+                </div>
               </motion.div>
               <div className="flex flex-col items-center gap-5">
                 {change === (user?.email ?? "") ? (
@@ -137,17 +136,13 @@ export default function Home() {
                       transition={{ duration: 1 }}
                       className="flex items-center gap-5"
                     >
-                      {user === null ? (
-                        <Skeleton className="h-5 w-75 rounded-md" />
-                      ) : (
-                        <>
-                          Email: {user?.new_email || user?.email}
-                          <Edit
-                            size={20}
-                            onClick={() => setChange(user?.email ?? "")}
-                          />
-                        </>
-                      )}
+                      <>
+                        Email: {user?.new_email || user?.email}
+                        <Edit
+                          size={20}
+                          onClick={() => setChange(user?.email ?? "")}
+                        />
+                      </>
                     </motion.div>
                   </div>
                 )}
@@ -156,67 +151,61 @@ export default function Home() {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ duration: 1 }}
                 >
-                  {user === null ? (
-                    <Skeleton className="h-5 w-40 rounded-md" />
+                  {change === (user?.user_metadata?.full_name ?? "") ? (
+                    <div>
+                      <div>
+                        <motion.div
+                          initial={{ y: -5, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          transition={{ duration: 1 }}
+                        >
+                          Fullname: {name || user?.user_metadata?.full_name}
+                        </motion.div>
+                        <div className="flex items-center gap-2 mt-5">
+                          <motion.input
+                            initial={{ y: -5, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ duration: 1, delay: 0.2 }}
+                            className="outline-0 border border-neutral-800 p-2 text-sm h-10 w-50 rounded-lg pl-2"
+                            placeholder={user?.user_metadata?.full_name}
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                          />
+                          <motion.div
+                            initial={{ y: -5, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ duration: 1, delay: 0.4 }}
+                            onClick={() => {
+                              setChange(null);
+                              setName("");
+                            }}
+                            className="border border-neutral-800 p-2 rounded-lg cursor-pointer"
+                          >
+                            Back
+                          </motion.div>
+                          <motion.div
+                            initial={{ y: -5, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ duration: 1, delay: 0.6 }}
+                            onClick={ChangeUsername}
+                            className="border border-neutral-800 p-2 rounded-lg cursor-pointer"
+                          >
+                            Change
+                          </motion.div>
+                        </div>
+                      </div>
+                    </div>
                   ) : (
                     <div>
-                      {change === (user?.user_metadata?.full_name ?? "") ? (
-                        <div>
-                          <div>
-                            <motion.div
-                              initial={{ y: -5, opacity: 0 }}
-                              animate={{ y: 0, opacity: 1 }}
-                              transition={{ duration: 1 }}
-                            >
-                              Fullname: {name || user?.user_metadata?.full_name}
-                            </motion.div>
-                            <div className="flex items-center gap-2 mt-5">
-                              <motion.input
-                                initial={{ y: -5, opacity: 0 }}
-                                animate={{ y: 0, opacity: 1 }}
-                                transition={{ duration: 1, delay: 0.2 }}
-                                className="outline-0 border border-neutral-800 p-2 text-sm h-10 w-50 rounded-lg pl-2"
-                                placeholder={user?.user_metadata?.full_name}
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                              />
-                              <motion.div
-                                initial={{ y: -5, opacity: 0 }}
-                                animate={{ y: 0, opacity: 1 }}
-                                transition={{ duration: 1, delay: 0.4 }}
-                                onClick={() => {
-                                  setChange(null);
-                                  setName("");
-                                }}
-                                className="border border-neutral-800 p-2 rounded-lg cursor-pointer"
-                              >
-                                Back
-                              </motion.div>
-                              <motion.div
-                                initial={{ y: -5, opacity: 0 }}
-                                animate={{ y: 0, opacity: 1 }}
-                                transition={{ duration: 1, delay: 0.6 }}
-                                onClick={ChangeUsername}
-                                className="border border-neutral-800 p-2 rounded-lg cursor-pointer"
-                              >
-                                Change
-                              </motion.div>
-                            </div>
-                          </div>
-                        </div>
-                      ) : (
-                        <div>
-                          <div className="flex items-center gap-5">
-                            Fullname: {name || user?.user_metadata?.full_name}
-                            <Edit
-                              size={20}
-                              onClick={() =>
-                                setChange(user?.user_metadata?.full_name ?? "")
-                              }
-                            />
-                          </div>
-                        </div>
-                      )}
+                      <div className="flex items-center gap-5">
+                        Fullname: {name || user?.user_metadata?.full_name}
+                        <Edit
+                          size={20}
+                          onClick={() =>
+                            setChange(user?.user_metadata?.full_name ?? "")
+                          }
+                        />
+                      </div>
                     </div>
                   )}
                 </motion.div>
@@ -318,26 +307,22 @@ export default function Home() {
             <div className="text-2xl m-10">Profile</div>
             <div className="flex items-start gap-5">
               <motion.div>
-                {user === null ? (
-                  <Skeleton className="ml-10 w-[130px] h-[130px] rounded-4xl" />
-                ) : (
-                  <div className="ml-10">
-                    <div>
-                      {user?.user_metadata?.avatar_url && (
-                        <div className="flex items-end gap-2">
-                          <Image
-                            src={user.user_metadata.avatar_url}
-                            alt="Avatar"
-                            width={130}
-                            height={130}
-                            className="rounded-4xl"
-                          />
-                          <motion.div></motion.div>
-                        </div>
-                      )}
-                    </div>
+                <div className="ml-10">
+                  <div>
+                    {user?.user_metadata?.avatar_url && (
+                      <div className="flex items-end gap-2">
+                        <Image
+                          src={user.user_metadata.avatar_url}
+                          alt="Avatar"
+                          width={130}
+                          height={130}
+                          className="rounded-4xl"
+                        />
+                        <motion.div></motion.div>
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
               </motion.div>
               <div className="flex flex-col items-center gap-5">
                 {change === (user?.email ?? "") ? (
@@ -392,17 +377,13 @@ export default function Home() {
                       transition={{ duration: 1 }}
                       className="flex items-center gap-5"
                     >
-                      {user === null ? (
-                        <Skeleton className="h-5 w-75 rounded-md" />
-                      ) : (
-                        <>
-                          Email: {user?.new_email || user?.email}
-                          <Edit
-                            size={20}
-                            onClick={() => setChange(user?.email ?? "")}
-                          />
-                        </>
-                      )}
+                      <>
+                        Email: {user?.new_email || user?.email}
+                        <Edit
+                          size={20}
+                          onClick={() => setChange(user?.email ?? "")}
+                        />
+                      </>
                     </motion.div>
                   </div>
                 )}
@@ -411,69 +392,65 @@ export default function Home() {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ duration: 1 }}
                 >
-                  {user === null ? (
-                    <Skeleton className="h-5 w-40 rounded-md" />
-                  ) : (
-                    <div>
-                      {change === (user?.user_metadata?.full_name ?? "") ? (
+                  <div>
+                    {change === (user?.user_metadata?.full_name ?? "") ? (
+                      <div>
                         <div>
-                          <div>
+                          <motion.div
+                            initial={{ y: -5, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ duration: 1 }}
+                          >
+                            Fullname: {name || user?.user_metadata?.full_name}
+                          </motion.div>
+                          <div className="flex items-center gap-2 mt-5">
+                            <motion.input
+                              initial={{ y: -5, opacity: 0 }}
+                              animate={{ y: 0, opacity: 1 }}
+                              transition={{ duration: 1, delay: 0.2 }}
+                              className="outline-0 border border-neutral-800 p-2 text-sm h-10 w-90 rounded-lg pl-2"
+                              placeholder={user?.user_metadata?.full_name}
+                              value={name}
+                              onChange={(e) => setName(e.target.value)}
+                            />
                             <motion.div
                               initial={{ y: -5, opacity: 0 }}
                               animate={{ y: 0, opacity: 1 }}
-                              transition={{ duration: 1 }}
+                              transition={{ duration: 1, delay: 0.4 }}
+                              onClick={() => {
+                                setChange(null);
+                                setName("");
+                              }}
+                              className="border border-neutral-800 p-2 rounded-lg cursor-pointer"
                             >
-                              Fullname: {name || user?.user_metadata?.full_name}
+                              Back
                             </motion.div>
-                            <div className="flex items-center gap-2 mt-5">
-                              <motion.input
-                                initial={{ y: -5, opacity: 0 }}
-                                animate={{ y: 0, opacity: 1 }}
-                                transition={{ duration: 1, delay: 0.2 }}
-                                className="outline-0 border border-neutral-800 p-2 text-sm h-10 w-90 rounded-lg pl-2"
-                                placeholder={user?.user_metadata?.full_name}
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                              />
-                              <motion.div
-                                initial={{ y: -5, opacity: 0 }}
-                                animate={{ y: 0, opacity: 1 }}
-                                transition={{ duration: 1, delay: 0.4 }}
-                                onClick={() => {
-                                  setChange(null);
-                                  setName("");
-                                }}
-                                className="border border-neutral-800 p-2 rounded-lg cursor-pointer"
-                              >
-                                Back
-                              </motion.div>
-                              <motion.div
-                                initial={{ y: -5, opacity: 0 }}
-                                animate={{ y: 0, opacity: 1 }}
-                                transition={{ duration: 1, delay: 0.6 }}
-                                onClick={ChangeUsername}
-                                className="border border-neutral-800 p-2 rounded-lg cursor-pointer"
-                              >
-                                Change
-                              </motion.div>
-                            </div>
+                            <motion.div
+                              initial={{ y: -5, opacity: 0 }}
+                              animate={{ y: 0, opacity: 1 }}
+                              transition={{ duration: 1, delay: 0.6 }}
+                              onClick={ChangeUsername}
+                              className="border border-neutral-800 p-2 rounded-lg cursor-pointer"
+                            >
+                              Change
+                            </motion.div>
                           </div>
                         </div>
-                      ) : (
-                        <div>
-                          <div className="flex items-center gap-5">
-                            Fullname: {name || user?.user_metadata?.full_name}
-                            <Edit
-                              size={20}
-                              onClick={() =>
-                                setChange(user?.user_metadata?.full_name ?? "")
-                              }
-                            />
-                          </div>
+                      </div>
+                    ) : (
+                      <div>
+                        <div className="flex items-center gap-5">
+                          Fullname: {name || user?.user_metadata?.full_name}
+                          <Edit
+                            size={20}
+                            onClick={() =>
+                              setChange(user?.user_metadata?.full_name ?? "")
+                            }
+                          />
                         </div>
-                      )}
-                    </div>
-                  )}
+                      </div>
+                    )}
+                  </div>
                 </motion.div>
                 <div>
                   <motion.div
@@ -481,26 +458,12 @@ export default function Home() {
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ duration: 1 }}
                   >
-                    {user === null ? (
-                      <div>
-                        <Skeleton className="h-5 w-20 rounded-md" />
-                        {!user && (
-                          <div
-                            className="text-center mt-2 cursor-pointer"
-                            onClick={() => router.push("/Account")}
-                          >
-                            Signin
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div
-                        onClick={Logout}
-                        className="flex items-center gap-2 hover:text-red-500"
-                      >
-                        Logout <LogOut size={20} />
-                      </div>
-                    )}
+                    <div
+                      onClick={Logout}
+                      className="flex items-center gap-2 hover:text-red-500"
+                    >
+                      Logout <LogOut size={20} />
+                    </div>
                   </motion.div>
                 </div>
               </div>

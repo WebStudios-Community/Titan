@@ -173,7 +173,7 @@ export default function Home() {
         <div>
           {change ? (
             <div key="signup">
-              <div className="border border-neutral-600 p-2 m-10 rounded-lg w-[350px]">
+              <div className="border border-neutral-600 p-2 m-10 rounded-lg w-[300px]">
                 <div className="ml-5 mt-2">
                   <Link href="/">
                     <motion.div
@@ -430,7 +430,7 @@ export default function Home() {
             </div>
           ) : (
             <div key="signin">
-              <div className="border border-neutral-600 p-2 m-10 rounded-lg w-[350px]">
+              <div className="border border-neutral-600 p-2 m-10 rounded-lg w-[300px]">
                 <div className="ml-5 mt-2">
                   <Link href="/">
                     <motion.div

@@ -47,6 +47,7 @@ export default function GamesPage() {
   const [no, setNo] = useState(false);
   const [genres, setGenres] = useState("");
   const [show, setShow] = useState(false);
+  const [refresh, setRefresh] = useState(false);
   const discount = searchParams.get("discount") === "true";
   const genresParam = searchParams.get("Genres");
   const genresArray = genresParam ? genresParam.split(",") : [];
@@ -99,13 +100,12 @@ export default function GamesPage() {
 
   useEffect(() => {
     const getGames = async () => {
-      const { data } = await supabase.from("Games").select("*");
-
-      setGames(data);
+      const { data, error } = await supabase.from("Games").select("*");
+      if (!error) setGames(data);
     };
 
     getGames();
-  });
+  }, [refresh, user]);
   useEffect(() => {
     const Getuser = async () => {
       const {
@@ -160,8 +160,7 @@ export default function GamesPage() {
             quantity: 1,
           })
           .single();
-
-        if (insertError) console.log(insertError);
+        if (!insertError) setRefresh((prev) => !prev);
       }
     } catch (err) {
       console.log(err);
@@ -899,69 +898,18 @@ export default function GamesPage() {
         </div>
         <div>
           <div>
-            {games === null ? (
-              <div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mt-25">
-                  {[...Array(5)].map((_, i) => (
-                    <div key={i} className="flex justify-center">
-                      <Skeleton className="w-[220px] h-110 rounded-2xl" />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-6 mt-25 mr-5">
-                {filteredGames?.map((game) => (
-                  <div key={game.id}>
-                    <div>
-                      <div className="w-full max-w-[420px] border-3 border-neutral-700 p-5 rounded-2xl h-110 relative">
-                        <div className="relative flex items-center justify-center">
-                          {hovered === game.id ? (
-                            <div>
-                              <AnimatePresence>
-                                {game.Image_Url && (
-                                  <div
-                                    className="relative inline-block"
-                                    onMouseLeave={() => setHovered(null)}
-                                  >
-                                    <Image
-                                      src={ImgurConv(game.Image_Url[0])}
-                                      alt=""
-                                      width={200}
-                                      height={200}
-                                      className="rounded-2xl blur transition-all duration-500"
-                                    />
-
-                                    {game.discount && (
-                                      <div className="absolute -top-2 -right-2 text-xs border border-purple-500 bg-purple-500 rounded-full w-8 h-8 flex items-center justify-center">
-                                        {game.discount}%
-                                      </div>
-                                    )}
-
-                                    <Link href={`/Game/${game.id}`}>
-                                      <div className="absolute inset-0 flex items-center justify-center">
-                                        <motion.div
-                                          initial={{ y: -10, opacity: 0 }}
-                                          animate={{ y: 0, opacity: 1 }}
-                                          exit={{ y: -10, opacity: 0 }}
-                                          whileHover={{ scale: 1.1 }}
-                                          whileTap={{ scale: 1 }}
-                                          transition={{ duration: 1 }}
-                                          className="border border-neutral-600 p-2 rounded-xl bg-neutral-600"
-                                        >
-                                          View
-                                        </motion.div>
-                                      </div>
-                                    </Link>
-                                  </div>
-                                )}
-                              </AnimatePresence>
-                            </div>
-                          ) : (
-                            <div className="relative inline-block">
+            <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-6 mt-25 mr-5">
+              {filteredGames?.map((game) => (
+                <div key={game.id}>
+                  <div>
+                    <div className="w-full max-w-[420px] border-3 border-neutral-700 p-5 rounded-2xl h-130 relative">
+                      <div className="relative flex items-center justify-center">
+                        {hovered === game.id ? (
+                          <div>
+                            <AnimatePresence>
                               {game.Image_Url && (
                                 <div
-                                  onMouseEnter={() => setHovered(game.id)}
+                                  className="relative inline-block"
                                   onMouseLeave={() => setHovered(null)}
                                 >
                                   <Image
@@ -969,328 +917,366 @@ export default function GamesPage() {
                                     alt=""
                                     width={200}
                                     height={200}
-                                    className="rounded-2xl transition-all duration-500"
+                                    className="rounded-2xl blur transition-all duration-500"
                                   />
 
                                   {game.discount && (
-                                    <div className="absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 text-xs border border-purple-500 bg-purple-500 rounded-full w-8 h-8 flex items-center justify-center">
+                                    <div className="absolute -top-2 -right-2 text-xs border border-purple-500 bg-purple-500 rounded-full w-8 h-8 flex items-center justify-center">
                                       {game.discount}%
                                     </div>
                                   )}
+
+                                  <Link href={`/Game/${game.id}`}>
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                      <motion.div
+                                        initial={{ y: -10, opacity: 0 }}
+                                        animate={{ y: 0, opacity: 1 }}
+                                        exit={{ y: -10, opacity: 0 }}
+                                        whileHover={{ scale: 1.1 }}
+                                        whileTap={{ scale: 1 }}
+                                        transition={{ duration: 1 }}
+                                        className="border border-neutral-600 p-2 rounded-xl bg-neutral-600"
+                                      >
+                                        View
+                                      </motion.div>
+                                    </div>
+                                  </Link>
                                 </div>
                               )}
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex flex-col justify-center ml-5 mt-5 gap-5">
-                          <div className="text-xs">{game.Name}</div>
-                          <div>
-                            {game.discount ? (
-                              <div className="flex items-end gap-2">
-                                <div className="text-xs text-neutral-400 line-through">
-                                  {game.Price}
-                                </div>
-                                <div className="text-emerald-400">
-                                  {game.discountedPrice}rsd
-                                </div>
-                              </div>
-                            ) : (
-                              <div className="text-emerald-400">
-                                {game.Price}rsd
+                            </AnimatePresence>
+                          </div>
+                        ) : (
+                          <div className="relative inline-block">
+                            {game.Image_Url && (
+                              <div
+                                onMouseEnter={() => setHovered(game.id)}
+                                onMouseLeave={() => setHovered(null)}
+                              >
+                                <Image
+                                  src={ImgurConv(game.Image_Url[0])}
+                                  alt=""
+                                  width={200}
+                                  height={200}
+                                  className="rounded-2xl transition-all duration-500"
+                                />
+
+                                {game.discount && (
+                                  <div className="absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 text-xs border border-purple-500 bg-purple-500 rounded-full w-8 h-8 flex items-center justify-center">
+                                    {game.discount}%
+                                  </div>
+                                )}
                               </div>
                             )}
                           </div>
-                          <div className="flex flex-col gap-1">
-                            Platform:
-                            <div className="flex gap-4">
-                              {game.Platform.map((plat, i) => {
-                                switch (plat) {
-                                  case "steam":
-                                    return (
-                                      <div key={i} className="relative">
-                                        <SiSteam
-                                          onMouseEnter={() =>
-                                            setShowP({
-                                              id: game.id,
-                                              platform: "steam",
-                                            })
-                                          }
-                                          onMouseLeave={() => setShowP(null)}
-                                        />
-                                        <AnimatePresence>
-                                          {showP?.id === game.id &&
-                                            showP?.platform === "steam" && (
-                                              <motion.div
-                                                initial={{ y: 2, opacity: 0 }}
-                                                animate={{ y: 0, opacity: 1 }}
-                                                exit={{ y: 2, opacity: 0 }}
-                                                transition={{ duration: 0.8 }}
-                                                className="absolute text-xs -left-4 -top-8 rounded-full z-50 border border-neutral-700 p-1 bg-neutral-700"
-                                              >
-                                                Steam
-                                              </motion.div>
-                                            )}
-                                        </AnimatePresence>
-                                      </div>
-                                    );
-                                  case "epic":
-                                    return (
-                                      <div key={i} className="relative">
-                                        <SiEpicgames
-                                          onMouseEnter={() =>
-                                            setShowP({
-                                              id: game.id,
-                                              platform: "epic",
-                                            })
-                                          }
-                                          onMouseLeave={() => setShowP(null)}
-                                        />
-                                        <AnimatePresence>
-                                          {showP?.id === game.id &&
-                                            showP?.platform === "epic" && (
-                                              <motion.div
-                                                initial={{ y: 2, opacity: 0 }}
-                                                animate={{ y: 0, opacity: 1 }}
-                                                exit={{ y: 2, opacity: 0 }}
-                                                transition={{ duration: 0.8 }}
-                                                className="absolute text-xs -left-8 -top-8 rounded-full z-50 border border-neutral-700 p-1 w-21 bg-neutral-700 text-center"
-                                              >
-                                                Epic Games
-                                              </motion.div>
-                                            )}
-                                        </AnimatePresence>
-                                      </div>
-                                    );
-                                  case "rockstar":
-                                    return (
-                                      <div key={i} className="relative">
-                                        <SiOnstar
-                                          onMouseEnter={() =>
-                                            setShowP({
-                                              id: game.id,
-                                              platform: "rockstar",
-                                            })
-                                          }
-                                          onMouseLeave={() => setShowP(null)}
-                                        />
-                                        <AnimatePresence>
-                                          {showP?.id === game.id &&
-                                            showP?.platform === "rockstar" && (
-                                              <motion.div
-                                                initial={{ y: 2, opacity: 0 }}
-                                                animate={{ y: 0, opacity: 1 }}
-                                                exit={{ y: 2, opacity: 0 }}
-                                                transition={{ duration: 0.8 }}
-                                                className="absolute text-xs -left-6 -top-8 rounded-full z-50 border border-neutral-700 p-1 bg-neutral-700 text-center"
-                                              >
-                                                Rockstar
-                                              </motion.div>
-                                            )}
-                                        </AnimatePresence>
-                                      </div>
-                                    );
-                                  case "microsoft":
-                                    return (
-                                      <div key={i} className="relative">
-                                        <FaMicrosoft
-                                          onMouseEnter={() =>
-                                            setShowP({
-                                              id: game.id,
-                                              platform: "microsoft",
-                                            })
-                                          }
-                                          onMouseLeave={() => setShowP(null)}
-                                        />
-                                        <AnimatePresence>
-                                          {showP?.id === game.id &&
-                                            showP?.platform === "microsoft" && (
-                                              <motion.div
-                                                initial={{ y: 2, opacity: 0 }}
-                                                animate={{ y: 0, opacity: 1 }}
-                                                exit={{ y: 2, opacity: 0 }}
-                                                transition={{ duration: 0.8 }}
-                                                className="absolute text-xs -left-6 -top-8 rounded-full z-50 border border-neutral-700 p-1 bg-neutral-700 text-center"
-                                              >
-                                                Microsoft
-                                              </motion.div>
-                                            )}
-                                        </AnimatePresence>
-                                      </div>
-                                    );
-                                  case "eaplay":
-                                    return (
-                                      <div key={i} className="relative">
-                                        <SiEa
-                                          onMouseEnter={() =>
-                                            setShowP({
-                                              id: game.id,
-                                              platform: "microsoft",
-                                            })
-                                          }
-                                          onMouseLeave={() => setShowP(null)}
-                                        />
-                                        <AnimatePresence>
-                                          {showP?.id === game.id &&
-                                            showP?.platform === "microsoft" && (
-                                              <motion.div
-                                                initial={{ y: 2, opacity: 0 }}
-                                                animate={{ y: 0, opacity: 1 }}
-                                                exit={{ y: 2, opacity: 0 }}
-                                                transition={{ duration: 0.8 }}
-                                                className="absolute text-xs -left-6 -top-8 rounded-full z-50 border border-neutral-700 p-1 w-15 bg-neutral-700 text-center"
-                                              >
-                                                EA Play
-                                              </motion.div>
-                                            )}
-                                        </AnimatePresence>
-                                      </div>
-                                    );
-                                  case "playstation":
-                                    return (
-                                      <div key={i} className="relative">
-                                        <FaPlaystation
-                                          onMouseEnter={() =>
-                                            setShowP({
-                                              id: game.id,
-                                              platform: "playstation",
-                                            })
-                                          }
-                                          onMouseLeave={() => setShowP(null)}
-                                        />
-                                        <AnimatePresence>
-                                          {showP?.id === game.id &&
-                                            showP?.platform ===
-                                              "playstation" && (
-                                              <motion.div
-                                                initial={{ y: 2, opacity: 0 }}
-                                                animate={{ y: 0, opacity: 1 }}
-                                                exit={{ y: 2, opacity: 0 }}
-                                                transition={{ duration: 0.8 }}
-                                                className="absolute text-xs -left-6 -top-8 rounded-full z-50 border border-neutral-700 p-1 bg-neutral-700 text-center"
-                                              >
-                                                Playstation
-                                              </motion.div>
-                                            )}
-                                        </AnimatePresence>
-                                      </div>
-                                    );
-                                  case "xbox":
-                                    return (
-                                      <div key={i} className="relative">
-                                        <FaXbox
-                                          onMouseEnter={() =>
-                                            setShowP({
-                                              id: game.id,
-                                              platform: "xbox",
-                                            })
-                                          }
-                                          onMouseLeave={() => setShowP(null)}
-                                        />
-                                        <AnimatePresence>
-                                          {showP?.id === game.id &&
-                                            showP?.platform === "xbox" && (
-                                              <motion.div
-                                                initial={{ y: 2, opacity: 0 }}
-                                                animate={{ y: 0, opacity: 1 }}
-                                                exit={{ y: 2, opacity: 0 }}
-                                                transition={{ duration: 0.8 }}
-                                                className="absolute text-xs -left-3 -top-8 rounded-full z-50 border border-neutral-700 p-1 bg-neutral-700 text-center"
-                                              >
-                                                Xbox
-                                              </motion.div>
-                                            )}
-                                        </AnimatePresence>
-                                      </div>
-                                    );
-                                }
-                              }).slice(0, 3)}
-                              ...
+                        )}
+                      </div>
+                      <div className="flex flex-col justify-center ml-5 mt-5 gap-5">
+                        <div className="text-xs">{game.Name}</div>
+                        <div>
+                          {game.discount ? (
+                            <div className="flex items-end gap-2">
+                              <div className="text-xs text-neutral-400 line-through">
+                                {game.Price}
+                              </div>
+                              <div className="text-emerald-400">
+                                {game.discountedPrice}rsd
+                              </div>
                             </div>
+                          ) : (
+                            <div className="text-emerald-400">
+                              {game.Price}rsd
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          Platform:
+                          <div className="flex gap-4">
+                            {game.Platform.map((plat, i) => {
+                              switch (plat) {
+                                case "steam":
+                                  return (
+                                    <div key={i} className="relative">
+                                      <SiSteam
+                                        onMouseEnter={() =>
+                                          setShowP({
+                                            id: game.id,
+                                            platform: "steam",
+                                          })
+                                        }
+                                        onMouseLeave={() => setShowP(null)}
+                                      />
+                                      <AnimatePresence>
+                                        {showP?.id === game.id &&
+                                          showP?.platform === "steam" && (
+                                            <motion.div
+                                              initial={{ y: 2, opacity: 0 }}
+                                              animate={{ y: 0, opacity: 1 }}
+                                              exit={{ y: 2, opacity: 0 }}
+                                              transition={{ duration: 0.8 }}
+                                              className="absolute text-xs -left-4 -top-8 rounded-full z-50 border border-neutral-700 p-1 bg-neutral-700"
+                                            >
+                                              Steam
+                                            </motion.div>
+                                          )}
+                                      </AnimatePresence>
+                                    </div>
+                                  );
+                                case "epic":
+                                  return (
+                                    <div key={i} className="relative">
+                                      <SiEpicgames
+                                        onMouseEnter={() =>
+                                          setShowP({
+                                            id: game.id,
+                                            platform: "epic",
+                                          })
+                                        }
+                                        onMouseLeave={() => setShowP(null)}
+                                      />
+                                      <AnimatePresence>
+                                        {showP?.id === game.id &&
+                                          showP?.platform === "epic" && (
+                                            <motion.div
+                                              initial={{ y: 2, opacity: 0 }}
+                                              animate={{ y: 0, opacity: 1 }}
+                                              exit={{ y: 2, opacity: 0 }}
+                                              transition={{ duration: 0.8 }}
+                                              className="absolute text-xs -left-8 -top-8 rounded-full z-50 border border-neutral-700 p-1 w-21 bg-neutral-700 text-center"
+                                            >
+                                              Epic Games
+                                            </motion.div>
+                                          )}
+                                      </AnimatePresence>
+                                    </div>
+                                  );
+                                case "rockstar":
+                                  return (
+                                    <div key={i} className="relative">
+                                      <SiOnstar
+                                        onMouseEnter={() =>
+                                          setShowP({
+                                            id: game.id,
+                                            platform: "rockstar",
+                                          })
+                                        }
+                                        onMouseLeave={() => setShowP(null)}
+                                      />
+                                      <AnimatePresence>
+                                        {showP?.id === game.id &&
+                                          showP?.platform === "rockstar" && (
+                                            <motion.div
+                                              initial={{ y: 2, opacity: 0 }}
+                                              animate={{ y: 0, opacity: 1 }}
+                                              exit={{ y: 2, opacity: 0 }}
+                                              transition={{ duration: 0.8 }}
+                                              className="absolute text-xs -left-6 -top-8 rounded-full z-50 border border-neutral-700 p-1 bg-neutral-700 text-center"
+                                            >
+                                              Rockstar
+                                            </motion.div>
+                                          )}
+                                      </AnimatePresence>
+                                    </div>
+                                  );
+                                case "microsoft":
+                                  return (
+                                    <div key={i} className="relative">
+                                      <FaMicrosoft
+                                        onMouseEnter={() =>
+                                          setShowP({
+                                            id: game.id,
+                                            platform: "microsoft",
+                                          })
+                                        }
+                                        onMouseLeave={() => setShowP(null)}
+                                      />
+                                      <AnimatePresence>
+                                        {showP?.id === game.id &&
+                                          showP?.platform === "microsoft" && (
+                                            <motion.div
+                                              initial={{ y: 2, opacity: 0 }}
+                                              animate={{ y: 0, opacity: 1 }}
+                                              exit={{ y: 2, opacity: 0 }}
+                                              transition={{ duration: 0.8 }}
+                                              className="absolute text-xs -left-6 -top-8 rounded-full z-50 border border-neutral-700 p-1 bg-neutral-700 text-center"
+                                            >
+                                              Microsoft
+                                            </motion.div>
+                                          )}
+                                      </AnimatePresence>
+                                    </div>
+                                  );
+                                case "eaplay":
+                                  return (
+                                    <div key={i} className="relative">
+                                      <SiEa
+                                        onMouseEnter={() =>
+                                          setShowP({
+                                            id: game.id,
+                                            platform: "microsoft",
+                                          })
+                                        }
+                                        onMouseLeave={() => setShowP(null)}
+                                      />
+                                      <AnimatePresence>
+                                        {showP?.id === game.id &&
+                                          showP?.platform === "microsoft" && (
+                                            <motion.div
+                                              initial={{ y: 2, opacity: 0 }}
+                                              animate={{ y: 0, opacity: 1 }}
+                                              exit={{ y: 2, opacity: 0 }}
+                                              transition={{ duration: 0.8 }}
+                                              className="absolute text-xs -left-6 -top-8 rounded-full z-50 border border-neutral-700 p-1 w-15 bg-neutral-700 text-center"
+                                            >
+                                              EA Play
+                                            </motion.div>
+                                          )}
+                                      </AnimatePresence>
+                                    </div>
+                                  );
+                                case "playstation":
+                                  return (
+                                    <div key={i} className="relative">
+                                      <FaPlaystation
+                                        onMouseEnter={() =>
+                                          setShowP({
+                                            id: game.id,
+                                            platform: "playstation",
+                                          })
+                                        }
+                                        onMouseLeave={() => setShowP(null)}
+                                      />
+                                      <AnimatePresence>
+                                        {showP?.id === game.id &&
+                                          showP?.platform === "playstation" && (
+                                            <motion.div
+                                              initial={{ y: 2, opacity: 0 }}
+                                              animate={{ y: 0, opacity: 1 }}
+                                              exit={{ y: 2, opacity: 0 }}
+                                              transition={{ duration: 0.8 }}
+                                              className="absolute text-xs -left-6 -top-8 rounded-full z-50 border border-neutral-700 p-1 bg-neutral-700 text-center"
+                                            >
+                                              Playstation
+                                            </motion.div>
+                                          )}
+                                      </AnimatePresence>
+                                    </div>
+                                  );
+                                case "xbox":
+                                  return (
+                                    <div key={i} className="relative">
+                                      <FaXbox
+                                        onMouseEnter={() =>
+                                          setShowP({
+                                            id: game.id,
+                                            platform: "xbox",
+                                          })
+                                        }
+                                        onMouseLeave={() => setShowP(null)}
+                                      />
+                                      <AnimatePresence>
+                                        {showP?.id === game.id &&
+                                          showP?.platform === "xbox" && (
+                                            <motion.div
+                                              initial={{ y: 2, opacity: 0 }}
+                                              animate={{ y: 0, opacity: 1 }}
+                                              exit={{ y: 2, opacity: 0 }}
+                                              transition={{ duration: 0.8 }}
+                                              className="absolute text-xs -left-3 -top-8 rounded-full z-50 border border-neutral-700 p-1 bg-neutral-700 text-center"
+                                            >
+                                              Xbox
+                                            </motion.div>
+                                          )}
+                                      </AnimatePresence>
+                                    </div>
+                                  );
+                              }
+                            }).slice(0, 3)}
+                            ...
                           </div>
-                          <div className="flex flex-col gap-1">
-                            Type:
-                            <div className="flex items-center gap-4">
-                              {game.Type?.map((type, i) => {
-                                switch (type) {
-                                  case "key":
-                                    return (
-                                      <div key={i} className="relative">
-                                        <FaKey
-                                          onMouseEnter={() =>
-                                            setShowT({
-                                              id: game.id,
-                                              type: "key",
-                                            })
-                                          }
-                                          onMouseLeave={() => setShowT(null)}
-                                        />
-                                        <AnimatePresence>
-                                          {showT?.id === game.id &&
-                                            showT?.type === "key" && (
-                                              <motion.div
-                                                initial={{ y: 2, opacity: 0 }}
-                                                animate={{ y: 0, opacity: 1 }}
-                                                exit={{ y: 2, opacity: 0 }}
-                                                transition={{ duration: 0.8 }}
-                                                className="absolute text-xs -left-1 -top-8 rounded-full z-50 border border-neutral-700 p-1 bg-neutral-700"
-                                              >
-                                                Key
-                                              </motion.div>
-                                            )}
-                                        </AnimatePresence>
-                                      </div>
-                                    );
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          Type:
+                          <div className="flex items-center gap-4">
+                            {game.Type?.map((type, i) => {
+                              switch (type) {
+                                case "key":
+                                  return (
+                                    <div key={i} className="relative">
+                                      <FaKey
+                                        onMouseEnter={() =>
+                                          setShowT({
+                                            id: game.id,
+                                            type: "key",
+                                          })
+                                        }
+                                        onMouseLeave={() => setShowT(null)}
+                                      />
+                                      <AnimatePresence>
+                                        {showT?.id === game.id &&
+                                          showT?.type === "key" && (
+                                            <motion.div
+                                              initial={{ y: 2, opacity: 0 }}
+                                              animate={{ y: 0, opacity: 1 }}
+                                              exit={{ y: 2, opacity: 0 }}
+                                              transition={{ duration: 0.8 }}
+                                              className="absolute text-xs -left-1 -top-8 rounded-full z-50 border border-neutral-700 p-1 bg-neutral-700"
+                                            >
+                                              Key
+                                            </motion.div>
+                                          )}
+                                      </AnimatePresence>
+                                    </div>
+                                  );
 
-                                  case "account":
-                                    return (
-                                      <div key={i} className="relative">
-                                        <FaUser
-                                          onMouseEnter={() =>
-                                            setShowT({
-                                              id: game.id,
-                                              type: "account",
-                                            })
-                                          }
-                                          onMouseLeave={() => setShowT(null)}
-                                        />
-                                        <AnimatePresence>
-                                          {showT?.id === game.id &&
-                                            showT?.type === "account" && (
-                                              <motion.div
-                                                initial={{ y: 2, opacity: 0 }}
-                                                animate={{ y: 0, opacity: 1 }}
-                                                exit={{ y: 2, opacity: 0 }}
-                                                transition={{ duration: 0.8 }}
-                                                className="absolute text-xs -left-5 -top-8 rounded-full z-50 border border-neutral-700 p-1 bg-neutral-700"
-                                              >
-                                                Account
-                                              </motion.div>
-                                            )}
-                                        </AnimatePresence>
-                                      </div>
-                                    );
+                                case "account":
+                                  return (
+                                    <div key={i} className="relative">
+                                      <FaUser
+                                        onMouseEnter={() =>
+                                          setShowT({
+                                            id: game.id,
+                                            type: "account",
+                                          })
+                                        }
+                                        onMouseLeave={() => setShowT(null)}
+                                      />
+                                      <AnimatePresence>
+                                        {showT?.id === game.id &&
+                                          showT?.type === "account" && (
+                                            <motion.div
+                                              initial={{ y: 2, opacity: 0 }}
+                                              animate={{ y: 0, opacity: 1 }}
+                                              exit={{ y: 2, opacity: 0 }}
+                                              transition={{ duration: 0.8 }}
+                                              className="absolute text-xs -left-5 -top-8 rounded-full z-50 border border-neutral-700 p-1 bg-neutral-700"
+                                            >
+                                              Account
+                                            </motion.div>
+                                          )}
+                                      </AnimatePresence>
+                                    </div>
+                                  );
 
-                                  default:
-                                    return <span key={i}>{type}</span>;
-                                }
-                              })}
-                            </div>
+                                default:
+                                  return <span key={i}>{type}</span>;
+                              }
+                            })}
                           </div>
-                          <div className="absolute bottom-5 right-5 flex items-center justify-end">
-                            <div
-                              onClick={() => AddCart(game)}
-                              className="border border-neutral-600 w-20 h-10 rounded-xl bg-neutral-600 hover:scale-110 active:scale-100 transition-all flex items-center justify-center"
-                            >
-                              <ShoppingBag size={20} />
-                            </div>
+                        </div>
+                        <div className="absolute bottom-5 right-5 flex items-center justify-end">
+                          <div
+                            onClick={() => AddCart(game)}
+                            className="border border-neutral-600 w-20 h-10 rounded-xl bg-neutral-600 hover:scale-110 active:scale-100 transition-all flex items-center justify-center"
+                          >
+                            <ShoppingBag size={20} />
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
