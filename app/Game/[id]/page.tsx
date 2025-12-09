@@ -130,126 +130,120 @@ export default function Home({ params }: { params: { id: number } }) {
     <div>
       <div>
         <div className="md:hidden p-4">
-          {games === null ? (
-            <div className="flex justify-center mt-10">
-              <Skeleton className="w-[300px] h-[500px]" />
-            </div>
-          ) : (
-            <div className="flex flex-col gap-8">
-              {games.map((game) => {
-                const eurPrice = game.Price;
-                const rsdPrice = Math.round(eurPrice / 117);
-                const eurDiscount = game.discountedPrice;
-                const eurdiscP = Math.round(eurDiscount / 117);
+          <div className="flex flex-col gap-8">
+            {games?.map((game) => {
+              const eurPrice = game.Price;
+              const rsdPrice = Math.round(eurPrice / 117);
+              const eurDiscount = game.discountedPrice;
+              const eurdiscP = Math.round(eurDiscount / 117);
 
-                return (
-                  <div
-                    key={game.id}
-                    className="border border-neutral-600 rounded-xl overflow-hidden bg-neutral-900"
-                  >
-                    {Array.isArray(game.Image_Url) &&
-                      game.Image_Url.length > 0 && (
-                        <Carousel
-                          opts={{ align: "center" }}
-                          orientation="horizontal"
-                          className="w-full relative"
-                        >
-                          <CarouselContent>
-                            {game.Image_Url.map((img, index) => (
-                              <CarouselItem key={index}>
-                                <div className="relative flex justify-center p-2">
-                                  <Image
-                                    src={ImgurConv(img)}
-                                    alt={`image-${index}`}
-                                    width={300}
-                                    height={300}
-                                    className="rounded-xl w-full h-auto"
-                                  />
-                                  {game.discount && (
-                                    <div className="absolute top-2 right-2 w-8 h-8 bg-purple-500 text-white flex items-center justify-center rounded-full text-xs">
-                                      {game.discount}%
-                                    </div>
-                                  )}
-                                </div>
-                              </CarouselItem>
-                            ))}
-                          </CarouselContent>
-                        </Carousel>
-                      )}
-                    <div className="p-4 flex flex-col gap-2">
-                      <div className="text-lg font-semibold">{game.Name}</div>
-                      <div className="flex items-center gap-2">
-                        {game.discount ? (
-                          <>
-                            <div className="line-through text-sm text-neutral-400">
-                              {change ? `${rsdPrice}€` : `${eurPrice}rsd`}
-                            </div>
-                            <div className="text-lg font-bold">
-                              {change ? `${eurdiscP}€` : `${eurDiscount}rsd`}
-                            </div>
-                          </>
-                        ) : (
-                          <div className="text-lg font-bold">
+              return (
+                <div
+                  key={game.id}
+                  className="border border-neutral-600 rounded-xl overflow-hidden bg-neutral-900"
+                >
+                  {Array.isArray(game.Image_Url) &&
+                    game.Image_Url.length > 0 && (
+                      <Carousel
+                        opts={{ align: "center" }}
+                        orientation="horizontal"
+                        className="w-full relative"
+                      >
+                        <CarouselContent>
+                          {game.Image_Url.map((img, index) => (
+                            <CarouselItem key={index}>
+                              <div className="relative flex justify-center p-2">
+                                <Image
+                                  src={ImgurConv(img)}
+                                  alt={`image-${index}`}
+                                  width={300}
+                                  height={300}
+                                  className="rounded-xl w-full h-auto"
+                                />
+                                {game.discount && (
+                                  <div className="absolute top-2 right-2 w-8 h-8 bg-purple-500 text-white flex items-center justify-center rounded-full text-xs">
+                                    {game.discount}%
+                                  </div>
+                                )}
+                              </div>
+                            </CarouselItem>
+                          ))}
+                        </CarouselContent>
+                      </Carousel>
+                    )}
+                  <div className="p-4 flex flex-col gap-2">
+                    <div className="text-lg font-semibold">{game.Name}</div>
+                    <div className="flex items-center gap-2">
+                      {game.discount ? (
+                        <>
+                          <div className="line-through text-sm text-neutral-400">
                             {change ? `${rsdPrice}€` : `${eurPrice}rsd`}
                           </div>
-                        )}
-                        <div
-                          className="text-xs cursor-pointer ml-2"
-                          onClick={() => setChange(!change)}
-                        >
-                          {change ? "RSD" : "EUR"}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex flex-col items-center gap-2 p-4">
-                      <div className="flex items-center gap-4 text-lg">
-                        <div
-                          onClick={() => setQuantity((prev) => prev + 1)}
-                          className="cursor-pointer p-2 bg-neutral-700 rounded"
-                        >
-                          +
-                        </div>
-                        <div>{quantity}</div>
-                        <div
-                          onClick={() =>
-                            quantity > 1 && setQuantity((prev) => prev - 1)
-                          }
-                          className="cursor-pointer p-2 bg-neutral-700 rounded"
-                        >
-                          -
-                        </div>
-                      </div>
-                      <div
-                        onClick={() => AddCart(game)}
-                        className="flex items-center justify-center gap-2 bg-neutral-700 hover:bg-neutral-600 transition-all cursor-pointer p-2 rounded-xl w-full mt-2"
-                      >
-                        <ShoppingBag size={20} />
-                        <span>Add Cart</span>
-                      </div>
-                    </div>
-                    <div className="p-4">
-                      <div
-                        onClick={() => setShow(!show)}
-                        className="cursor-pointer flex justify-between items-center border border-neutral-700 rounded-xl p-2"
-                      >
-                        <span>Game Description</span>
-                        {show ? (
-                          <ChevronUp size={18} />
-                        ) : (
-                          <ChevronDown size={18} />
-                        )}
-                      </div>
-                      {show && (
-                        <div className="mt-2 text-sm text-neutral-300">
-                          {game.Description}
+                          <div className="text-lg font-bold">
+                            {change ? `${eurdiscP}€` : `${eurDiscount}rsd`}
+                          </div>
+                        </>
+                      ) : (
+                        <div className="text-lg font-bold">
+                          {change ? `${rsdPrice}€` : `${eurPrice}rsd`}
                         </div>
                       )}
+                      <div
+                        className="text-xs cursor-pointer ml-2"
+                        onClick={() => setChange(!change)}
+                      >
+                        {change ? "RSD" : "EUR"}
+                      </div>
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          )}
+                  <div className="flex flex-col items-center gap-2 p-4">
+                    <div className="flex items-center gap-4 text-lg">
+                      <div
+                        onClick={() => setQuantity((prev) => prev + 1)}
+                        className="cursor-pointer p-2 bg-neutral-700 rounded"
+                      >
+                        +
+                      </div>
+                      <div>{quantity}</div>
+                      <div
+                        onClick={() =>
+                          quantity > 1 && setQuantity((prev) => prev - 1)
+                        }
+                        className="cursor-pointer p-2 bg-neutral-700 rounded"
+                      >
+                        -
+                      </div>
+                    </div>
+                    <div
+                      onClick={() => AddCart(game)}
+                      className="flex items-center justify-center gap-2 bg-neutral-700 hover:bg-neutral-600 transition-all cursor-pointer p-2 rounded-xl w-full mt-2"
+                    >
+                      <ShoppingBag size={20} />
+                      <span>Add Cart</span>
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <div
+                      onClick={() => setShow(!show)}
+                      className="cursor-pointer flex justify-between items-center border border-neutral-700 rounded-xl p-2"
+                    >
+                      <span>Game Description</span>
+                      {show ? (
+                        <ChevronUp size={18} />
+                      ) : (
+                        <ChevronDown size={18} />
+                      )}
+                    </div>
+                    {show && (
+                      <div className="mt-2 text-sm text-neutral-300">
+                        {game.Description}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
         <div className="md:flex hidden items-center justify-center">
           <div>
