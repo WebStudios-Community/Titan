@@ -27,7 +27,6 @@ export default function Home() {
   useEffect(() => {
     const getGames = async () => {
       const cartUserID = user?.id || guestID;
-
       const { data, error } = await supabase
         .from("Cart")
         .select("*")

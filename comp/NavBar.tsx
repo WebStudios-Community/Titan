@@ -54,7 +54,6 @@ export default function NavBar() {
   useEffect(() => {
     const getGames = async () => {
       const cartUserID = user?.id || guestID;
-      if (!cartUserID) return;
 
       const { data, error } = await supabase
         .from("Cart")

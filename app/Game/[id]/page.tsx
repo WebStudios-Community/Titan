@@ -54,8 +54,11 @@ export default function Home({ params }: { params: { id: number } }) {
   useEffect(() => {
     const getGames = async () => {
       const { id } = await params;
-      const { data } = await supabase.from("Games").select("*").eq("id", id);
-      if (!data) setGames(data);
+      const { data, error } = await supabase
+        .from("Games")
+        .select("*")
+        .eq("id", id);
+      if (!error) setGames(data);
     };
 
     getGames();
